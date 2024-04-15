@@ -4,8 +4,11 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect } from 'react';
-
+import { Platform,Alert } from 'react-native';
 import { useColorScheme } from '@/components/useColorScheme';
+
+import Purchases from 'react-native-purchases';
+Purchases.setLogLevel(Purchases.LOG_LEVEL.VERBOSE);
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -36,6 +39,27 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
+
+  useEffect(() => {
+
+    if (Platform.OS === 'ios') {
+      if(!process.env.EXPO_PUBLIC_RC_IOS) {
+        Alert.alert("Error ","RevenueCat API key Error");
+      } else {
+        console.log(process.env.EXPO_PUBLIC_RC_IOS);
+        Purchases.configure({ apiKey: process.env.EXPO_PUBLIC_RC_IOS });
+      }
+
+    } else if (Platform.OS === 'android') {
+      if(!process.env.EXPO_PUBLIC_RC_ANDROID) {
+        Alert.alert("Error ","RevenueCat API key Error");
+      }else {
+        Purchases.configure({ apiKey: process.env.EXPO_PUBLIC_RC_ANDROID });
+      }
+    }
+
+    Purchases.getOfferings().then(console.log);
+  },[])
 
   if (!loaded) {
     return null;
